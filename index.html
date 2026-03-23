@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StatGuessr</title>
+    <meta
+      name="description"
+      content="Guess the city from socioeconomic stats. A fast, stream-friendly geography game powered by city metrics."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+
+    <div class="page-shell">
+      <header class="hero">
+        <div class="eyebrow">Numbeo-backed city trivia</div>
+        <div class="hero-row">
+          <div class="hero-copy">
+            <h1>StatGuessr</h1>
+            <p class="hero-text">
+              Read the numbers. Trust your instincts. Drop a pin on the city.
+            </p>
+            <p class="hero-subtext">
+              Each round reveals 5 to 8 clues like rent, crime, commute, and
+              pollution. Perfect for streams, office battles, and “one more
+              round” loops.
+            </p>
+          </div>
+
+          <div class="hero-actions">
+            <button id="newChallengeButton" class="button button-primary">
+              New challenge
+            </button>
+            <button id="shareSeedButton" class="button button-secondary">
+              Copy seed link
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <article class="stat-card">
+            <span class="stat-label">Round</span>
+            <strong id="roundValue" class="stat-value">1 / 5</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Total score</span>
+            <strong id="scoreValue" class="stat-value">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Challenge seed</span>
+            <strong id="seedValue" class="stat-value">loading</strong>
+          </article>
+        </div>
+      </header>
+
+      <main class="game-grid">
+        <section class="panel clues-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-eyebrow">Clues</p>
+              <h2 id="clueHeading">Find the hidden city</h2>
+            </div>
+            <span id="statusBadge" class="status-badge">Pick a spot on the map</span>
+          </div>
+
+          <div id="clueCards" class="clue-grid" aria-live="polite"></div>
+
+          <div class="controls">
+            <button
+              id="submitGuessButton"
+              class="button button-primary"
+              disabled
+            >
+              Lock in guess
+            </button>
+            <button
+              id="nextRoundButton"
+              class="button button-secondary"
+              hidden
+            >
+              Next round
+            </button>
+          </div>
+
+          <section id="summaryCard" class="summary-card" hidden>
+            <div class="summary-score-wrap">
+              <span class="summary-label">Round score</span>
+              <strong id="roundScoreValue" class="summary-score">0</strong>
+            </div>
+            <p id="summaryText" class="summary-text"></p>
+            <p id="distanceText" class="summary-detail"></p>
+          </section>
+
+          <section class="history-panel">
+            <div class="history-head">
+              <p class="panel-eyebrow">Scoreboard</p>
+              <span id="historyCaption" class="history-caption">
+                Five rounds per challenge
+              </span>
+            </div>
+            <div id="historyBar" class="history-bar"></div>
+          </section>
+        </section>
+
+        <section class="panel map-panel">
+          <div id="map" class="map" aria-label="World map for guessing cities"></div>
+          <div class="map-callout">
+            Click anywhere on the map to place your guess.
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer-note">
+        Seeded rounds make it easy to share the exact same challenge with other
+        players.
+      </footer>
+    </div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="data/cities.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
