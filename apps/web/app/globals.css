@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas: #f6f1e8;
+  --paper: #fffaf2;
+  --ink: #1f2d2b;
+  --muted: #6d7a76;
+  --line: rgba(31, 45, 43, 0.12);
+  --emerald: #17685c;
+  --ember: #ab5f2c;
+  --font-heading: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", "Menlo", "Consolas", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(171, 95, 44, 0.12), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(23, 104, 92, 0.14), transparent 28%),
+    linear-gradient(180deg, #f4efe4 0%, #f8f4ec 55%, #f1ebe1 100%);
+  font-family: var(--font-heading), ui-sans-serif, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+code,
+pre {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}

@@ -1,0 +1,1437 @@
+openapi: 3.1.0
+info:
+  title: Relay Console API
+  version: 0.1.0
+  summary: Original control plane API for prompts, runs, traces, datasets, and agents.
+servers:
+  - url: http://localhost:8000/v1
+tags:
+  - name: Health
+  - name: Auth
+  - name: Workspaces
+  - name: API Keys
+  - name: Providers
+  - name: Models
+  - name: Prompts
+  - name: Requests
+  - name: Traces
+  - name: Datasets
+  - name: Evals
+  - name: Agents
+  - name: Webhooks
+  - name: Analytics
+  - name: Audit
+paths:
+  /health/live:
+    get:
+      tags: [Health]
+      operationId: liveHealth
+      responses:
+        "200":
+          description: Liveness probe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /health/ready:
+    get:
+      tags: [Health]
+      operationId: readyHealth
+      responses:
+        "200":
+          description: Readiness probe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /auth/magic-links/request:
+    post:
+      tags: [Auth]
+      operationId: requestMagicLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MagicLinkRequest"
+      responses:
+        "202":
+          description: Magic link created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MagicLinkResponse"
+  /auth/magic-links/verify:
+    post:
+      tags: [Auth]
+      operationId: verifyMagicLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MagicLinkVerifyRequest"
+      responses:
+        "200":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /auth/me:
+    get:
+      tags: [Auth]
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current authenticated actor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentActor"
+  /workspaces:
+    get:
+      tags: [Workspaces]
+      operationId: listWorkspaces
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Workspace memberships
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceListResponse"
+    post:
+      tags: [Workspaces]
+      operationId: createWorkspace
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkspaceRequest"
+      responses:
+        "201":
+          description: Workspace created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceDetail"
+  /workspaces/{workspaceId}:
+    get:
+      tags: [Workspaces]
+      operationId: getWorkspace
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Workspace detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceDetail"
+  /workspaces/{workspaceId}/members:
+    get:
+      tags: [Workspaces]
+      operationId: listWorkspaceMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Workspace members
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMembersResponse"
+    post:
+      tags: [Workspaces]
+      operationId: upsertWorkspaceMember
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpsertWorkspaceMemberRequest"
+      responses:
+        "200":
+          description: Membership created or updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMember"
+  /workspaces/{workspaceId}/api-keys:
+    get:
+      tags: [API Keys]
+      operationId: listApiKeys
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: API keys
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyListResponse"
+    post:
+      tags: [API Keys]
+      operationId: createApiKey
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateApiKeyRequest"
+      responses:
+        "201":
+          description: API key created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateApiKeyResponse"
+  /workspaces/{workspaceId}/api-keys/{apiKeyId}/revoke:
+    post:
+      tags: [API Keys]
+      operationId: revokeApiKey
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/ApiKeyId"
+      responses:
+        "200":
+          description: API key revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKey"
+  /workspaces/{workspaceId}/providers:
+    get:
+      tags: [Providers]
+      operationId: listProviders
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Provider list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedProviders"
+    post:
+      tags: [Providers]
+      operationId: createProvider
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProviderRequest"
+      responses:
+        "201":
+          description: Provider created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Provider"
+  /workspaces/{workspaceId}/models:
+    get:
+      tags: [Models]
+      operationId: listModels
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Model catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedModels"
+  /workspaces/{workspaceId}/prompts:
+    get:
+      tags: [Prompts]
+      operationId: listPrompts
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Prompt templates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedPrompts"
+    post:
+      tags: [Prompts]
+      operationId: createPrompt
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePromptRequest"
+      responses:
+        "201":
+          description: Prompt created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptTemplate"
+  /workspaces/{workspaceId}/prompts/{promptId}/versions:
+    get:
+      tags: [Prompts]
+      operationId: listPromptVersions
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/PromptId"
+      responses:
+        "200":
+          description: Prompt version history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedPromptVersions"
+    post:
+      tags: [Prompts]
+      operationId: createPromptVersion
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/PromptId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePromptVersionRequest"
+      responses:
+        "201":
+          description: Prompt version created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptVersion"
+  /workspaces/{workspaceId}/prompts/{promptId}/versions/{versionId}/diff:
+    get:
+      tags: [Prompts]
+      operationId: diffPromptVersion
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/PromptId"
+        - $ref: "#/components/parameters/VersionId"
+      responses:
+        "200":
+          description: Prompt diff
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptDiffResponse"
+  /workspaces/{workspaceId}/release-labels:
+    get:
+      tags: [Prompts]
+      operationId: listReleaseLabels
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Release labels
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedReleaseLabels"
+    post:
+      tags: [Prompts]
+      operationId: createReleaseLabel
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReleaseLabelRequest"
+      responses:
+        "201":
+          description: Release label created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseLabel"
+  /workspaces/{workspaceId}/run:
+    post:
+      tags: [Requests]
+      operationId: runPrompt
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RunPromptRequest"
+      responses:
+        "200":
+          description: Prompt execution accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunPromptResponse"
+  /workspaces/{workspaceId}/requests:
+    get:
+      tags: [Requests]
+      operationId: listRequests
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Request log
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedRequests"
+  /workspaces/{workspaceId}/requests/{requestId}:
+    get:
+      tags: [Requests]
+      operationId: getRequest
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/RequestId"
+      responses:
+        "200":
+          description: Request detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestDetail"
+  /workspaces/{workspaceId}/traces:
+    get:
+      tags: [Traces]
+      operationId: listTraces
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Trace list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedTraces"
+  /workspaces/{workspaceId}/traces/ingest:
+    post:
+      tags: [Traces]
+      operationId: ingestTrace
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TraceIngestRequest"
+      responses:
+        "202":
+          description: Trace accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceAccepted"
+  /workspaces/{workspaceId}/datasets:
+    get:
+      tags: [Datasets]
+      operationId: listDatasets
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Dataset list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedDatasets"
+    post:
+      tags: [Datasets]
+      operationId: createDataset
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDatasetRequest"
+      responses:
+        "201":
+          description: Dataset created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dataset"
+  /workspaces/{workspaceId}/datasets/from-logs:
+    post:
+      tags: [Datasets]
+      operationId: createDatasetFromLogs
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDatasetFromLogsRequest"
+      responses:
+        "202":
+          description: Dataset materialization started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobAccepted"
+  /workspaces/{workspaceId}/evaluators:
+    get:
+      tags: [Evals]
+      operationId: listEvaluators
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Evaluators
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedEvaluators"
+    post:
+      tags: [Evals]
+      operationId: createEvaluator
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEvaluatorRequest"
+      responses:
+        "201":
+          description: Evaluator created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Evaluator"
+  /workspaces/{workspaceId}/eval-runs:
+    get:
+      tags: [Evals]
+      operationId: listEvalRuns
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Eval runs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedEvalRuns"
+    post:
+      tags: [Evals]
+      operationId: createEvalRun
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEvalRunRequest"
+      responses:
+        "202":
+          description: Eval accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobAccepted"
+  /workspaces/{workspaceId}/agents:
+    get:
+      tags: [Agents]
+      operationId: listAgents
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedAgents"
+    post:
+      tags: [Agents]
+      operationId: createAgent
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAgentRequest"
+      responses:
+        "201":
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+  /workspaces/{workspaceId}/agents/{agentId}/run:
+    post:
+      tags: [Agents]
+      operationId: runAgent
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/AgentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RunAgentRequest"
+      responses:
+        "202":
+          description: Agent run accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentRunAccepted"
+  /workspaces/{workspaceId}/webhooks:
+    get:
+      tags: [Webhooks]
+      operationId: listWebhooks
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Webhooks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedWebhooks"
+    post:
+      tags: [Webhooks]
+      operationId: createWebhook
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWebhookRequest"
+      responses:
+        "201":
+          description: Webhook created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webhook"
+  /workspaces/{workspaceId}/analytics/overview:
+    get:
+      tags: [Analytics]
+      operationId: getAnalyticsOverview
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Overview metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsOverview"
+  /workspaces/{workspaceId}/audit:
+    get:
+      tags: [Audit]
+      operationId: listAuditLogs
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      responses:
+        "200":
+          description: Audit events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedAuditLogs"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Relay-Key
+  parameters:
+    WorkspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      schema:
+        type: string
+    ApiKeyId:
+      name: apiKeyId
+      in: path
+      required: true
+      schema:
+        type: string
+    PromptId:
+      name: promptId
+      in: path
+      required: true
+      schema:
+        type: string
+    VersionId:
+      name: versionId
+      in: path
+      required: true
+      schema:
+        type: string
+    RequestId:
+      name: requestId
+      in: path
+      required: true
+      schema:
+        type: string
+    AgentId:
+      name: agentId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        service:
+          type: string
+      required: [status, service]
+    MagicLinkRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        workspace_slug:
+          type: string
+      required: [email]
+    MagicLinkResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        preview_url:
+          type: string
+          nullable: true
+      required: [message, expires_at]
+    MagicLinkVerifyRequest:
+      type: object
+      properties:
+        token:
+          type: string
+      required: [token]
+    SessionResponse:
+      type: object
+      properties:
+        session_token:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/User"
+      required: [session_token, expires_at, user]
+    CurrentActor:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        workspaces:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceMember"
+      required: [user, workspaces]
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        display_name:
+          type: string
+          nullable: true
+      required: [id, email]
+    CreateWorkspaceRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+      required: [name, slug]
+    Workspace:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        plan_tier:
+          type: string
+      required: [id, name, slug, plan_tier]
+    WorkspaceMember:
+      type: object
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+        workspace:
+          $ref: "#/components/schemas/Workspace"
+      required: [id, role, user, workspace]
+    WorkspaceDetail:
+      allOf:
+        - $ref: "#/components/schemas/Workspace"
+        - type: object
+          properties:
+            membership:
+              $ref: "#/components/schemas/WorkspaceMember"
+    WorkspaceListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceMember"
+      required: [items]
+    WorkspaceMembersResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceMember"
+      required: [items]
+    UpsertWorkspaceMemberRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [owner, admin, editor, viewer]
+      required: [email, role]
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        key_prefix:
+          type: string
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required: [id, label, key_prefix, created_at]
+    ApiKeyListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiKey"
+      required: [items]
+    CreateApiKeyRequest:
+      type: object
+      properties:
+        label:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+      required: [label]
+    CreateApiKeyResponse:
+      type: object
+      properties:
+        api_key:
+          $ref: "#/components/schemas/ApiKey"
+        secret:
+          type: string
+      required: [api_key, secret]
+    Provider:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        display_name:
+          type: string
+        adapter:
+          type: string
+      required: [id, slug, display_name, adapter]
+    CreateProviderRequest:
+      type: object
+      properties:
+        slug:
+          type: string
+        display_name:
+          type: string
+        adapter:
+          type: string
+        base_url:
+          type: string
+          nullable: true
+      required: [slug, display_name, adapter]
+    Model:
+      type: object
+      properties:
+        id:
+          type: string
+        identifier:
+          type: string
+        display_name:
+          type: string
+        family:
+          type: string
+      required: [id, identifier, display_name, family]
+    PromptTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+      required: [id, name, slug]
+    CreatePromptRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+      required: [name, slug]
+    PromptVersion:
+      type: object
+      properties:
+        id:
+          type: string
+        version_number:
+          type: integer
+        change_message:
+          type: string
+          nullable: true
+        token_estimate:
+          type: integer
+      required: [id, version_number, token_estimate]
+    CreatePromptVersionRequest:
+      type: object
+      properties:
+        template_text:
+          type: string
+        change_message:
+          type: string
+        variables_schema:
+          type: object
+      required: [template_text]
+    PromptDiffResponse:
+      type: object
+      properties:
+        summary:
+          type: string
+        additions:
+          type: integer
+        removals:
+          type: integer
+      required: [summary, additions, removals]
+    ReleaseLabel:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+      required: [id, name]
+    CreateReleaseLabelRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+      required: [name]
+    RunPromptRequest:
+      type: object
+      properties:
+        prompt_name:
+          type: string
+        label:
+          type: string
+        version_id:
+          type: string
+        variables:
+          type: object
+        metadata:
+          type: object
+        tags:
+          type: array
+          items:
+            type: string
+      required: [prompt_name]
+    RunPromptResponse:
+      type: object
+      properties:
+        request_id:
+          type: string
+        status:
+          type: string
+        output:
+          type: object
+      required: [request_id, status]
+    RequestSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        prompt_name:
+          type: string
+          nullable: true
+        latency_ms:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required: [id, status, created_at]
+    RequestDetail:
+      allOf:
+        - $ref: "#/components/schemas/RequestSummary"
+        - type: object
+          properties:
+            metadata:
+              type: object
+            tags:
+              type: array
+              items:
+                type: string
+            rendered_prompt:
+              type: string
+              nullable: true
+            trace_id:
+              type: string
+              nullable: true
+    TraceSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+      required: [id, status, started_at]
+    TraceIngestRequest:
+      type: object
+      properties:
+        trace_id:
+          type: string
+        root_span:
+          type: object
+        spans:
+          type: array
+          items:
+            type: object
+      required: [trace_id, spans]
+    TraceAccepted:
+      type: object
+      properties:
+        trace_id:
+          type: string
+        status:
+          type: string
+      required: [trace_id, status]
+    Dataset:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        source_kind:
+          type: string
+      required: [id, name, source_kind]
+    CreateDatasetRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+      required: [name]
+    CreateDatasetFromLogsRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        request_ids:
+          type: array
+          items:
+            type: string
+      required: [name]
+    Evaluator:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        evaluator_type:
+          type: string
+      required: [id, name, evaluator_type]
+    CreateEvaluatorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        evaluator_type:
+          type: string
+        config:
+          type: object
+      required: [name, evaluator_type]
+    EvalRun:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required: [id, status, created_at]
+    CreateEvalRunRequest:
+      type: object
+      properties:
+        dataset_version_id:
+          type: string
+        eval_pipeline_id:
+          type: string
+        baseline_prompt_version_id:
+          type: string
+        candidate_prompt_version_id:
+          type: string
+      required: [dataset_version_id, eval_pipeline_id]
+    Agent:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required: [id, name]
+    CreateAgentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+      required: [name]
+    RunAgentRequest:
+      type: object
+      properties:
+        input:
+          type: object
+      required: [input]
+    AgentRunAccepted:
+      type: object
+      properties:
+        agent_run_id:
+          type: string
+        trace_id:
+          type: string
+      required: [agent_run_id, trace_id]
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        target_url:
+          type: string
+      required: [id, name, target_url]
+    CreateWebhookRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        target_url:
+          type: string
+        event_types:
+          type: array
+          items:
+            type: string
+      required: [name, target_url, event_types]
+    AnalyticsOverview:
+      type: object
+      properties:
+        request_count:
+          type: integer
+        success_rate:
+          type: number
+        latency_p95_ms:
+          type: integer
+        estimated_spend_usd:
+          type: number
+      required: [request_count, success_rate, latency_p95_ms, estimated_spend_usd]
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+        target_type:
+          type: string
+        target_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required: [id, action, target_type, target_id, created_at]
+    JobAccepted:
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+      required: [job_id, status]
+    PaginatedProviders:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Provider"
+      required: [items]
+    PaginatedModels:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Model"
+      required: [items]
+    PaginatedPrompts:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PromptTemplate"
+      required: [items]
+    PaginatedPromptVersions:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PromptVersion"
+      required: [items]
+    PaginatedReleaseLabels:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReleaseLabel"
+      required: [items]
+    PaginatedRequests:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequestSummary"
+      required: [items]
+    PaginatedTraces:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TraceSummary"
+      required: [items]
+    PaginatedDatasets:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Dataset"
+      required: [items]
+    PaginatedEvaluators:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Evaluator"
+      required: [items]
+    PaginatedEvalRuns:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EvalRun"
+      required: [items]
+    PaginatedAgents:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Agent"
+      required: [items]
+    PaginatedWebhooks:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Webhook"
+      required: [items]
+    PaginatedAuditLogs:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+      required: [items]

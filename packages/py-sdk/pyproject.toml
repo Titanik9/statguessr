@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "relay-console-sdk"
+version = "0.1.0"
+description = "Python SDK for Relay Console"
+requires-python = ">=3.12"
+dependencies = [
+  "httpx>=0.27.0"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

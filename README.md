@@ -1,48 +1,58 @@
-# StatGuessr
+# Relay Console
 
-StatGuessr is a lightweight browser game where each round reveals a handful of
-city metrics and the player has to click the correct city on the map.
+Relay Console is an original, self-hosted AI prompt and agent management platform for teams that need prompt versioning, runtime observability, evaluations, release controls, and multi-provider execution.
 
-## What is in this version
+This repository is now organized as a product monorepo. The previous static StatGuessr prototype was preserved under [`legacy/statguessr/`](/Users/yehornekrasov/Documents/New%20project/legacy/statguessr/README.md) so the new platform can evolve without losing the old work.
 
-- 5-round seeded challenges for easy sharing in streams or competitions
-- Click-to-guess world map with distance-based scoring
-- Clue cards built from rent, cappuccino, gym, crime, commute, pollution, and
-  two bonus metrics
-- Local city snapshot generated from public Numbeo pages
+## Current status
 
-## Run locally
+- Product docs and API surface drafted
+- Monorepo scaffold created
+- Phase 2 foundation in progress: auth, workspaces, RBAC, API keys
 
-From the project root:
+## Why FastAPI
 
-```bash
-python3 -m http.server 4173
+The backend uses FastAPI instead of NestJS because it gets us to a working platform faster for this domain:
+
+- Pydantic gives strong request validation and OpenAPI generation
+- Celery integrates naturally for async evals and webhook delivery
+- Python is a better home for evaluator plugins, prompt linting, and data tooling
+- The Python SDK can dogfood the same models and runtime conventions
+
+## Monorepo layout
+
+```text
+.
+├── apps
+│   ├── api                  # FastAPI app, Alembic migrations, Celery entrypoints
+│   └── web                  # Next.js 15 admin console
+├── docs                     # PRD, architecture, schema, API surface, deployment notes
+├── infra
+│   └── compose              # Docker Compose stack and local infrastructure config
+├── legacy
+│   └── statguessr           # Preserved previous static prototype
+├── packages
+│   ├── py-sdk               # Python SDK scaffold
+│   └── ts-sdk               # TypeScript SDK scaffold
+├── Makefile
+└── package.json
 ```
 
-Then open `http://localhost:4173`.
+## First milestones
 
-## Refresh the dataset
+1. Identity, workspaces, RBAC, and API keys
+2. Prompt registry and release labels
+3. Run API, request logs, and request detail pages
+4. Traces, datasets, evals, and analytics
 
-The game uses a local snapshot in `data/cities.js`.
-To rebuild it from public Numbeo pages:
+## Local development
 
-```bash
-python3 tools/fetch_numbeo.py
-```
+The repository is scaffolded for `npm` workspaces and Python `venv` usage in this environment. Docker Compose files are included for the intended self-hosted deployment path, but Docker is not installed in the current shell session so the stack has not been started here yet.
 
-The script also writes a JSON copy to `data/cities.json`.
+See:
 
-## Deploy
-
-This project is a static site, so Vercel can deploy it directly from the repo
-root with no build step.
-
-```bash
-vercel
-vercel --prod
-```
-
-## Data note
-
-This is a small, local gameplay snapshot sourced from public Numbeo pages for a
-demo-sized city list. It is not a bulk mirror of Numbeo data.
+- [`docs/prd.md`](/Users/yehornekrasov/Documents/New%20project/docs/prd.md)
+- [`docs/architecture.md`](/Users/yehornekrasov/Documents/New%20project/docs/architecture.md)
+- [`docs/schema.md`](/Users/yehornekrasov/Documents/New%20project/docs/schema.md)
+- [`docs/openapi.yaml`](/Users/yehornekrasov/Documents/New%20project/docs/openapi.yaml)
+- [`docs/deployment.md`](/Users/yehornekrasov/Documents/New%20project/docs/deployment.md)

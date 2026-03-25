@@ -1,0 +1,16 @@
+{
+  "name": "relay-console",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/web",
+    "packages/ts-sdk"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace @relay-console/web",
+    "build:web": "npm run build --workspace @relay-console/web",
+    "lint:web": "npm run lint --workspace @relay-console/web",
+    "typecheck:web": "npm run typecheck --workspace @relay-console/web",
+    "build:sdk": "npm run build --workspace @relay-console/ts-sdk"
+  }
+}
