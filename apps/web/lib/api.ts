@@ -1,6 +1,10 @@
-const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/v1";
+const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 export async function requestMagicLink(email: string) {
+  if (!apiBase) {
+    throw new Error("NEXT_PUBLIC_API_URL is not configured for this deployment.");
+  }
+
   const response = await fetch(`${apiBase}/auth/magic-links/request`, {
     method: "POST",
     headers: {
